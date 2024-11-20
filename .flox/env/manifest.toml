@@ -18,6 +18,12 @@ cmake.pkg-path = "cmake"
 poppler_utils.pkg-path = "poppler_utils"
 tesseract.pkg-path = "tesseract"
 
+# System/C deps
+gcc-unwrapped.pkg-path = "gcc-unwrapped"
+pkg-config.pkg-path = "pkg-config"
+glibc.pkg-path = "glibc"  # glibc only needed on linux builds
+glibc.systems = [ "x86_64-linux" , "aarch64-linux"]
+
 # db
 neo4j.pkg-path = "neo4j"
 ollama.pkg-path = "ollama"
@@ -101,10 +107,11 @@ common = '''
 [services]
 frontend.command = '''
 cd frontend
-yarn run serve
+yarn run dev
 '''
 
 backend.command = '''
+source "$PYTHON_DIR/bin/activate"
 cd backend
 python3 score.py
 '''
@@ -118,3 +125,4 @@ ollama serve
 systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
 # Uncomment to disable CUDA detection.
 # cuda-detection = false
+
