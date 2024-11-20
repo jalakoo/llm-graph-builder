@@ -3,14 +3,8 @@
   "manifest": {
     "version": 1,
     "install": {
-      "bruno": {
-        "pkg-path": "bruno"
-      },
       "cmake": {
         "pkg-path": "cmake"
-      },
-      "google-cloud-sdk": {
-        "pkg-path": "google-cloud-sdk"
       },
       "gum": {
         "pkg-path": "gum"
@@ -32,9 +26,6 @@
       },
       "tesseract": {
         "pkg-path": "tesseract"
-      },
-      "weaviate": {
-        "pkg-path": "weaviate"
       },
       "yarn": {
         "pkg-path": "yarn"
@@ -74,10 +65,10 @@
       "VITE_TIME_PER_PAGE": "50"
     },
     "hook": {
-      "on-activate": "# If we export this here, it can be used later in 'profiles.common'\nexport PYTHON_DIR=\"$FLOX_ENV_CACHE/python\"\n\nif [ ! -d \"$PYTHON_DIR\" ]; then\n  gum spin -s globe --title \"Creating venv in $PYTHON_DIR...\" -- python -m venv \"$PYTHON_DIR\"\nfi\n\n(\n  source \"$PYTHON_DIR/bin/activate\"\n  gum spin -s monkey --title \"Installing/updating requirements.txt ...\" -- pip install -r backend/requirements.txt\n)\n"
+      "on-activate": "# If we export this here, it can be used later in 'profiles.common'\nexport PYTHON_DIR=\"$FLOX_ENV_CACHE/python\"\n\nif [ ! -d \"$PYTHON_DIR\" ]; then\n  gum spin -s globe --title \"Creating venv in $PYTHON_DIR...\" -- python -m venv \"$PYTHON_DIR\"\nfi\n\n(\n  source \"$PYTHON_DIR/bin/activate\"\n  gum spin -s monkey --title \"Installing/updating requirements.txt ...\" -- pip install -r backend/requirements.txt\n)\n\n(\n  cd frontend\n  gum spin -s monkey --title \"Installing/updating JS dependencies ...\" -- yarn install\n)\n"
     },
     "profile": {
-      "common": "  # Activate the Python venv\n  source \"$PYTHON_DIR/bin/activate\"\n\n  mkdir -p \"${FLOX_ENV_CACHE}/neo4j/\"\n  export NEO4J_HOME=\"${FLOX_ENV_CACHE}/neo4j/\"\n"
+      "common": "  # Activate the Python venv\n  source \"$PYTHON_DIR/bin/activate\"\n"
     },
     "options": {
       "systems": [
@@ -93,14 +84,21 @@
     },
     "services": {
       "backend": {
-        "command": "cd backend\ngunicorn score:app --workers 8 --threads 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300\n",
+        "command": "source \"$PYTHON_DIR/bin/activate\"\ncd backend\npython3 score.py\n",
         "vars": null,
         "is-daemon": null,
         "shutdown": null,
         "systems": null
       },
       "frontend": {
-        "command": "cd frontend\nyarn run serve\n",
+        "command": "cd frontend\nyarn run dev\n",
+        "vars": null,
+        "is-daemon": null,
+        "shutdown": null,
+        "systems": null
+      },
+      "ollama": {
+        "command": "ollama serve\n",
         "vars": null,
         "is-daemon": null,
         "shutdown": null,
@@ -109,122 +107,6 @@
     }
   },
   "packages": [
-    {
-      "attr_path": "bruno",
-      "broken": false,
-      "derivation": "/nix/store/h2fq4lf9g3qz1f4zliw6vaxg74njjkj7-bruno-1.34.0.drv",
-      "description": "Open-source IDE For exploring and testing APIs",
-      "install_id": "bruno",
-      "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "bruno-1.34.0",
-      "pname": "bruno",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.34.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/8ilwanvzh6f82nmc0cqsk6q4f2xh58ip-bruno-1.34.0"
-      },
-      "system": "aarch64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "bruno",
-      "broken": false,
-      "derivation": "/nix/store/pagh790j9gy03p5alqk7j8frgx4hfddz-bruno-1.34.0.drv",
-      "description": "Open-source IDE For exploring and testing APIs",
-      "install_id": "bruno",
-      "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "bruno-1.34.0",
-      "pname": "bruno",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.34.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/s6lyx1ij8lyawjkgghaclryn97cnmp5c-bruno-1.34.0"
-      },
-      "system": "aarch64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "bruno",
-      "broken": false,
-      "derivation": "/nix/store/0xqycm0rs0mkda9qab9v6lgs51qwx7x9-bruno-1.34.0.drv",
-      "description": "Open-source IDE For exploring and testing APIs",
-      "install_id": "bruno",
-      "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "bruno-1.34.0",
-      "pname": "bruno",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.34.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/156s5l9j249by2xgp1adzdmi4vhvd3kg-bruno-1.34.0"
-      },
-      "system": "x86_64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "bruno",
-      "broken": false,
-      "derivation": "/nix/store/d4s4v21zqa67zlmgsrswffn4x19im4ig-bruno-1.34.0.drv",
-      "description": "Open-source IDE For exploring and testing APIs",
-      "install_id": "bruno",
-      "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "bruno-1.34.0",
-      "pname": "bruno",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.34.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/wbb1kffxhgp8xhy866w0pxqckycn0fdk-bruno-1.34.0"
-      },
-      "system": "x86_64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
     {
       "attr_path": "cmake",
       "broken": false,
@@ -338,122 +220,6 @@
       "outputs": {
         "debug": "/nix/store/wqa3jwxi67szp5q7s89x58a31791qh7s-cmake-3.30.4-debug",
         "out": "/nix/store/irwcgpm8csj7br49jih6kdpqkaqya3vf-cmake-3.30.4"
-      },
-      "system": "x86_64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "google-cloud-sdk",
-      "broken": false,
-      "derivation": "/nix/store/g64b7g72x79ca390vwf527dlr15mhdp8-google-cloud-sdk-494.0.0.drv",
-      "description": "Tools for the google cloud platform",
-      "install_id": "google-cloud-sdk",
-      "license": "Unspecified free software license",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "google-cloud-sdk-494.0.0",
-      "pname": "google-cloud-sdk",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "494.0.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/20fwrb08cvgkzzc7n0y1z0ak30fp9j2h-google-cloud-sdk-494.0.0"
-      },
-      "system": "aarch64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "google-cloud-sdk",
-      "broken": false,
-      "derivation": "/nix/store/bixbsngw2yp92slxdxqnf64dp89nkl3n-google-cloud-sdk-494.0.0.drv",
-      "description": "Tools for the google cloud platform",
-      "install_id": "google-cloud-sdk",
-      "license": "Unspecified free software license",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "google-cloud-sdk-494.0.0",
-      "pname": "google-cloud-sdk",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "494.0.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/x2ri13cd1nq7bnlc6v6245gcva5br68g-google-cloud-sdk-494.0.0"
-      },
-      "system": "aarch64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "google-cloud-sdk",
-      "broken": false,
-      "derivation": "/nix/store/80kix4qhb96vnlg976v8xk5pvdimywj7-google-cloud-sdk-494.0.0.drv",
-      "description": "Tools for the google cloud platform",
-      "install_id": "google-cloud-sdk",
-      "license": "Unspecified free software license",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "google-cloud-sdk-494.0.0",
-      "pname": "google-cloud-sdk",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "494.0.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/f5930424xn1irwgf066qi65fh26a8a72-google-cloud-sdk-494.0.0"
-      },
-      "system": "x86_64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "google-cloud-sdk",
-      "broken": false,
-      "derivation": "/nix/store/z7wf246abkgbqh20qn3xc5xh971ckcl8-google-cloud-sdk-494.0.0.drv",
-      "description": "Tools for the google cloud platform",
-      "install_id": "google-cloud-sdk",
-      "license": "Unspecified free software license",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "google-cloud-sdk-494.0.0",
-      "pname": "google-cloud-sdk",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "494.0.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/gflxadhqnf9pgm6hl2xk1szwkn2jrwk2-google-cloud-sdk-494.0.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -1276,122 +1042,6 @@
       ],
       "outputs": {
         "out": "/nix/store/dla8g8lpkv22nkdklvwdpqs8dab722mr-tesseract-5.3.4"
-      },
-      "system": "x86_64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "weaviate",
-      "broken": false,
-      "derivation": "/nix/store/f9lcy78x5d7z525v3fqh1q7ypmgka70r-weaviate-1.26.6.drv",
-      "description": "ML-first vector search engine",
-      "install_id": "weaviate",
-      "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "weaviate-1.26.6",
-      "pname": "weaviate",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.26.6",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/cpf599qri9xlba3jd06sflsix2mdgn0k-weaviate-1.26.6"
-      },
-      "system": "aarch64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "weaviate",
-      "broken": false,
-      "derivation": "/nix/store/l8fi727495dc3rs65c3f3b088s350wg4-weaviate-1.26.6.drv",
-      "description": "ML-first vector search engine",
-      "install_id": "weaviate",
-      "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "weaviate-1.26.6",
-      "pname": "weaviate",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.26.6",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/r99hysxm0m51cj4qckjsb2b74ldqv1jy-weaviate-1.26.6"
-      },
-      "system": "aarch64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "weaviate",
-      "broken": false,
-      "derivation": "/nix/store/b1wm83cgcwy2hdb062i1qk4z5858wjcj-weaviate-1.26.6.drv",
-      "description": "ML-first vector search engine",
-      "install_id": "weaviate",
-      "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "weaviate-1.26.6",
-      "pname": "weaviate",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.26.6",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/v5v2ivibp5c2l8qvscyldxp9igqsdbdv-weaviate-1.26.6"
-      },
-      "system": "x86_64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "weaviate",
-      "broken": false,
-      "derivation": "/nix/store/x8w4ynfaszfxr464q2mhagnlhcczzxzg-weaviate-1.26.6.drv",
-      "description": "ML-first vector search engine",
-      "install_id": "weaviate",
-      "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "name": "weaviate-1.26.6",
-      "pname": "weaviate",
-      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
-      "rev_count": 702572,
-      "rev_date": "2024-11-02T07:13:23Z",
-      "scrape_date": "2024-11-04T04:02:54Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "1.26.6",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/m8vxjjc3xhah9n29mip3mypzrv0ih4xv-weaviate-1.26.6"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

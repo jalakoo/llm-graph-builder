@@ -101,10 +101,11 @@ common = '''
 [services]
 frontend.command = '''
 cd frontend
-yarn run serve
+yarn run dev
 '''
 
 backend.command = '''
+source "$PYTHON_DIR/bin/activate"
 cd backend
 python3 score.py
 '''
