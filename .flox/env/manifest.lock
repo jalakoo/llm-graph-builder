@@ -1,0 +1,1517 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "bruno": {
+        "pkg-path": "bruno"
+      },
+      "cmake": {
+        "pkg-path": "cmake"
+      },
+      "google-cloud-sdk": {
+        "pkg-path": "google-cloud-sdk"
+      },
+      "gum": {
+        "pkg-path": "gum"
+      },
+      "neo4j": {
+        "pkg-path": "neo4j"
+      },
+      "nodejs": {
+        "pkg-path": "nodejs"
+      },
+      "ollama": {
+        "pkg-path": "ollama"
+      },
+      "poppler_utils": {
+        "pkg-path": "poppler_utils"
+      },
+      "python3": {
+        "pkg-path": "python3"
+      },
+      "tesseract": {
+        "pkg-path": "tesseract"
+      },
+      "weaviate": {
+        "pkg-path": "weaviate"
+      },
+      "yarn": {
+        "pkg-path": "yarn"
+      }
+    },
+    "vars": {
+      "DIFFBOT_API_KEY": "",
+      "EMBEDDING_MODEL": "all-MiniLM-L6-v2",
+      "ENTITY_EMBEDDING": "False",
+      "GCP_LOG_METRICS_ENABLED": "False",
+      "GCS_FILE_CACHE": "False",
+      "GEMINI_ENABLED": "False",
+      "IS_EMBEDDING": "true",
+      "KNN_MIN_SCORE": "0.94",
+      "LANGCHAIN_API_KEY": "",
+      "LANGCHAIN_ENDPOINT": "",
+      "LANGCHAIN_PROJECT": "",
+      "LANGCHAIN_TRACING_V2": "",
+      "LLM_MODEL_CONFIG_ollama_llama3": "llama3,http://localhost:11434",
+      "NEO4J_PASSWORD": "password",
+      "NEO4J_URI": "neo4j://localhost:7687",
+      "NEO4J_USERNAME": "neo4j",
+      "NUMBER_OF_CHUNKS_TO_COMBINE": "6",
+      "OPENAI_API_KEY": "",
+      "UPDATE_GRAPH_CHUNKS_PROCESSED": "20",
+      "VITE_BACKEND_API_URL": "http://localhost:8000",
+      "VITE_BATCH_SIZE": "2",
+      "VITE_BLOOM_URL": "https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true",
+      "VITE_CHAT_MODES": "",
+      "VITE_CHUNK_SIZE": "5242880",
+      "VITE_ENV": "DEV",
+      "VITE_GOOGLE_CLIENT_ID": "",
+      "VITE_LARGE_FILE_SIZE": "5242880",
+      "VITE_LLM_MODELS": "",
+      "VITE_LLM_MODELS_PROD": "ollama_llama3",
+      "VITE_REACT_APP_SOURCES": "local,youtube,wiki,s3,web",
+      "VITE_TIME_PER_PAGE": "50"
+    },
+    "hook": {
+      "on-activate": "# If we export this here, it can be used later in 'profiles.common'\nexport PYTHON_DIR=\"$FLOX_ENV_CACHE/python\"\n\nif [ ! -d \"$PYTHON_DIR\" ]; then\n  gum spin -s globe --title \"Creating venv in $PYTHON_DIR...\" -- python -m venv \"$PYTHON_DIR\"\nfi\n\n(\n  source \"$PYTHON_DIR/bin/activate\"\n  gum spin -s monkey --title \"Installing/updating requirements.txt ...\" -- pip install -r backend/requirements.txt\n)\n"
+    },
+    "profile": {
+      "common": "  # Activate the Python venv\n  source \"$PYTHON_DIR/bin/activate\"\n\n  mkdir -p \"${FLOX_ENV_CACHE}/neo4j/\"\n  export NEO4J_HOME=\"${FLOX_ENV_CACHE}/neo4j/\"\n"
+    },
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    },
+    "services": {
+      "backend": {
+        "command": "cd backend\ngunicorn score:app --workers 8 --threads 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300\n",
+        "vars": null,
+        "is-daemon": null,
+        "shutdown": null,
+        "systems": null
+      },
+      "frontend": {
+        "command": "cd frontend\nyarn run serve\n",
+        "vars": null,
+        "is-daemon": null,
+        "shutdown": null,
+        "systems": null
+      }
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "bruno",
+      "broken": false,
+      "derivation": "/nix/store/h2fq4lf9g3qz1f4zliw6vaxg74njjkj7-bruno-1.34.0.drv",
+      "description": "Open-source IDE For exploring and testing APIs",
+      "install_id": "bruno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bruno-1.34.0",
+      "pname": "bruno",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.34.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/8ilwanvzh6f82nmc0cqsk6q4f2xh58ip-bruno-1.34.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bruno",
+      "broken": false,
+      "derivation": "/nix/store/pagh790j9gy03p5alqk7j8frgx4hfddz-bruno-1.34.0.drv",
+      "description": "Open-source IDE For exploring and testing APIs",
+      "install_id": "bruno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bruno-1.34.0",
+      "pname": "bruno",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.34.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/s6lyx1ij8lyawjkgghaclryn97cnmp5c-bruno-1.34.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bruno",
+      "broken": false,
+      "derivation": "/nix/store/0xqycm0rs0mkda9qab9v6lgs51qwx7x9-bruno-1.34.0.drv",
+      "description": "Open-source IDE For exploring and testing APIs",
+      "install_id": "bruno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bruno-1.34.0",
+      "pname": "bruno",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.34.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/156s5l9j249by2xgp1adzdmi4vhvd3kg-bruno-1.34.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bruno",
+      "broken": false,
+      "derivation": "/nix/store/d4s4v21zqa67zlmgsrswffn4x19im4ig-bruno-1.34.0.drv",
+      "description": "Open-source IDE For exploring and testing APIs",
+      "install_id": "bruno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bruno-1.34.0",
+      "pname": "bruno",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.34.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/wbb1kffxhgp8xhy866w0pxqckycn0fdk-bruno-1.34.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cmake",
+      "broken": false,
+      "derivation": "/nix/store/b70cbvhx8r9hmg10kzawr6myb4j879zs-cmake-3.30.4.drv",
+      "description": "Cross-platform, open-source build system generator",
+      "install_id": "cmake",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cmake-3.30.4",
+      "pname": "cmake",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.30.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/wjja52fahksjwnikmy09n5y2pa7dymma-cmake-3.30.4"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cmake",
+      "broken": false,
+      "derivation": "/nix/store/v8n6nhdq57jcmfnm277d0fla5wsk3a27-cmake-3.30.4.drv",
+      "description": "Cross-platform, open-source build system generator",
+      "install_id": "cmake",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cmake-3.30.4",
+      "pname": "cmake",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.30.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/8s1jn7aj6k5r0dzga4na6mf2hmbhd62a-cmake-3.30.4-debug",
+        "out": "/nix/store/i8hfbcxgsp8aj8vhsscxyjsglilwd5i3-cmake-3.30.4"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cmake",
+      "broken": false,
+      "derivation": "/nix/store/10xbk4bmd2f6fpmn6diby3p023hjgaf0-cmake-3.30.4.drv",
+      "description": "Cross-platform, open-source build system generator",
+      "install_id": "cmake",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cmake-3.30.4",
+      "pname": "cmake",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.30.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/y0gmpiv78vyxb0bfqm8y58hqazjkpm7l-cmake-3.30.4"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cmake",
+      "broken": false,
+      "derivation": "/nix/store/v5mzfidz2cwydxw640imkb10q9nf2gly-cmake-3.30.4.drv",
+      "description": "Cross-platform, open-source build system generator",
+      "install_id": "cmake",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cmake-3.30.4",
+      "pname": "cmake",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.30.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/wqa3jwxi67szp5q7s89x58a31791qh7s-cmake-3.30.4-debug",
+        "out": "/nix/store/irwcgpm8csj7br49jih6kdpqkaqya3vf-cmake-3.30.4"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/g64b7g72x79ca390vwf527dlr15mhdp8-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/20fwrb08cvgkzzc7n0y1z0ak30fp9j2h-google-cloud-sdk-494.0.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/bixbsngw2yp92slxdxqnf64dp89nkl3n-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/x2ri13cd1nq7bnlc6v6245gcva5br68g-google-cloud-sdk-494.0.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/80kix4qhb96vnlg976v8xk5pvdimywj7-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/f5930424xn1irwgf066qi65fh26a8a72-google-cloud-sdk-494.0.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/z7wf246abkgbqh20qn3xc5xh971ckcl8-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/gflxadhqnf9pgm6hl2xk1szwkn2jrwk2-google-cloud-sdk-494.0.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "gum",
+      "broken": false,
+      "derivation": "/nix/store/sd2srnb6d2qsj3kamc0wnhpq1y9phpll-gum-0.14.5.drv",
+      "description": "Tasty Bubble Gum for your shell",
+      "install_id": "gum",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "gum-0.14.5",
+      "pname": "gum",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.14.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/yc1i3xn1aj5abcigi4h3yhr1migrb8wy-gum-0.14.5"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "gum",
+      "broken": false,
+      "derivation": "/nix/store/l9ln22mwn0x5rfffr8aa2zylwby9kzkw-gum-0.14.5.drv",
+      "description": "Tasty Bubble Gum for your shell",
+      "install_id": "gum",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "gum-0.14.5",
+      "pname": "gum",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.14.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/n7hrvg1wi6li9kaa1jgknnbdyzpa2kwz-gum-0.14.5"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "gum",
+      "broken": false,
+      "derivation": "/nix/store/rgfzq95bw2rzmvc9swv2nq9qwa7zr6w9-gum-0.14.5.drv",
+      "description": "Tasty Bubble Gum for your shell",
+      "install_id": "gum",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "gum-0.14.5",
+      "pname": "gum",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.14.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/962s45naidrx79v7p0q94xg5s2aq7i6v-gum-0.14.5"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "gum",
+      "broken": false,
+      "derivation": "/nix/store/0fginxfwrx3q9b8ahzhzkgfi84cjzwy4-gum-0.14.5.drv",
+      "description": "Tasty Bubble Gum for your shell",
+      "install_id": "gum",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "gum-0.14.5",
+      "pname": "gum",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.14.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/0bsz576va04hm8fgpsjlspjclmc1wkik-gum-0.14.5"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "neo4j",
+      "broken": false,
+      "derivation": "/nix/store/hlbnin7xxr99dxiglwa0718kh049rylw-neo4j-5.24.2.drv",
+      "description": "Highly scalable, robust (fully ACID) native graph database",
+      "install_id": "neo4j",
+      "license": "GPL-3.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "neo4j-5.24.2",
+      "pname": "neo4j",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.24.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/pjxnzcsifg38r9d5a4frpjbvmi0nrvxk-neo4j-5.24.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "neo4j",
+      "broken": false,
+      "derivation": "/nix/store/y0yn102bv2nqppjg4nm0w39jsbar2a19-neo4j-5.24.2.drv",
+      "description": "Highly scalable, robust (fully ACID) native graph database",
+      "install_id": "neo4j",
+      "license": "GPL-3.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "neo4j-5.24.2",
+      "pname": "neo4j",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.24.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/y06jrdyvwv88mvk74y11hx99r2b7p6zq-neo4j-5.24.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "neo4j",
+      "broken": false,
+      "derivation": "/nix/store/0kpl5vlwiy6sa40ia6qp0q3wflwgpqkc-neo4j-5.24.2.drv",
+      "description": "Highly scalable, robust (fully ACID) native graph database",
+      "install_id": "neo4j",
+      "license": "GPL-3.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "neo4j-5.24.2",
+      "pname": "neo4j",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.24.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/s8vdlg9l61pgnj19rr2jz5v02kap47nm-neo4j-5.24.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "neo4j",
+      "broken": false,
+      "derivation": "/nix/store/3jd5davz58kx0ic58is97piqp4pv3kqs-neo4j-5.24.2.drv",
+      "description": "Highly scalable, robust (fully ACID) native graph database",
+      "install_id": "neo4j",
+      "license": "GPL-3.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "neo4j-5.24.2",
+      "pname": "neo4j",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.24.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/2cbima78n2h55ihdqn8krmm2k3fzbv1q-neo4j-5.24.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/yz8yjgl9xs9gbk4y2ar44lng9vxnk454-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/0x38rb1l2fp5k1765pxw9jsxamcmq06n-nodejs-20.18.0-libv8",
+        "out": "/nix/store/n3yy2py144i01235yqq6ps3ah5dkynx2-nodejs-20.18.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/wb39s2j0p6bmynhvrrsbmayq1dal4pyn-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/b64y4904jda3vi487yrvk2ls1rkg30xm-nodejs-20.18.0-libv8",
+        "out": "/nix/store/p4kpvfr95znlbh61nwlwcdfc7gkcyngl-nodejs-20.18.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/3gqhy6sig3vbb8i9xql7mya9732mgsk0-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/sjs2syzk35xqm9jif9hp1rjd82irzkil-nodejs-20.18.0-libv8",
+        "out": "/nix/store/m1ymz3alwqc71yrmzl8sas2m8ksqhhsh-nodejs-20.18.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/02a7604ac95ibdih8a1gakfzpcvkxh1x-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/30a0s87x6bjvcd2fjpvg5safq58z80as-nodejs-20.18.0-libv8",
+        "out": "/nix/store/jz54v1m0ldqivx5i45q8i05pz5clf842-nodejs-20.18.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ollama",
+      "broken": false,
+      "derivation": "/nix/store/wid7vdlvp1gjybavln4crfwkcws7x6ph-ollama-0.3.12.drv",
+      "description": "Get up and running with large language models locally",
+      "install_id": "ollama",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "ollama-0.3.12",
+      "pname": "ollama",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.12",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/4jljlfaqh9im76bizwrw6chnkkm8l329-ollama-0.3.12"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ollama",
+      "broken": false,
+      "derivation": "/nix/store/m9nn8w6n21fjk2w0nlgk8g0f0lyz4mnn-ollama-0.3.12.drv",
+      "description": "Get up and running with large language models locally",
+      "install_id": "ollama",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "ollama-0.3.12",
+      "pname": "ollama",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.12",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/dszlnvrilmp466rirnw62j65rqd1i8pk-ollama-0.3.12"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ollama",
+      "broken": false,
+      "derivation": "/nix/store/qkzq7ydsnnm93imvr7c7p5zpxk5b0abh-ollama-0.3.12.drv",
+      "description": "Get up and running with large language models locally",
+      "install_id": "ollama",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "ollama-0.3.12",
+      "pname": "ollama",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.12",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/10j8llcsf973x91bhvbpmxm58yswlnya-ollama-0.3.12"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ollama",
+      "broken": false,
+      "derivation": "/nix/store/wfr3ymbq0hk0j520y1zqas3q3pdy98b3-ollama-0.3.12.drv",
+      "description": "Get up and running with large language models locally",
+      "install_id": "ollama",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "ollama-0.3.12",
+      "pname": "ollama",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.12",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/18garj9lhsxlbnin38h16l2k0db8fn6h-ollama-0.3.12"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "poppler_utils",
+      "broken": false,
+      "derivation": "/nix/store/5h42857ivhi57ajrf1isw8b284myfmx6-poppler-utils-24.02.0.drv",
+      "description": "PDF rendering library",
+      "install_id": "poppler_utils",
+      "license": "GPL-2.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "poppler-utils-24.02.0",
+      "pname": "poppler_utils",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "poppler-utils-24.02.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/ljpdq6kan55lspwfh859gz5pkc4gzw8w-poppler-utils-24.02.0-dev",
+        "out": "/nix/store/3ks25yjv2xgxx80bv2i5h7avlfibs8xj-poppler-utils-24.02.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "poppler_utils",
+      "broken": false,
+      "derivation": "/nix/store/9dva0sknzzm471cpizlw3kxdbqw43k81-poppler-utils-24.02.0.drv",
+      "description": "PDF rendering library",
+      "install_id": "poppler_utils",
+      "license": "GPL-2.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "poppler-utils-24.02.0",
+      "pname": "poppler_utils",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "poppler-utils-24.02.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/2lc9qfijris4h4y4bb9wc5ij46apjzkh-poppler-utils-24.02.0-dev",
+        "out": "/nix/store/qjc9349mx5h6w6vww1spskzaigwci46b-poppler-utils-24.02.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "poppler_utils",
+      "broken": false,
+      "derivation": "/nix/store/v7yjxkn1vg04pdzywq4vf27vazilrrd3-poppler-utils-24.02.0.drv",
+      "description": "PDF rendering library",
+      "install_id": "poppler_utils",
+      "license": "GPL-2.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "poppler-utils-24.02.0",
+      "pname": "poppler_utils",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "poppler-utils-24.02.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/a900y5675wd3la1p404igc7kxz4hrvw5-poppler-utils-24.02.0-dev",
+        "out": "/nix/store/g5l1qbmbfczalc19zqj4mkhi4i6cm27f-poppler-utils-24.02.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "poppler_utils",
+      "broken": false,
+      "derivation": "/nix/store/l12h7n6p1mhp960pgss150zjwg1kbq7v-poppler-utils-24.02.0.drv",
+      "description": "PDF rendering library",
+      "install_id": "poppler_utils",
+      "license": "GPL-2.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "poppler-utils-24.02.0",
+      "pname": "poppler_utils",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "poppler-utils-24.02.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/zwrxnzg33ch8qrgfvmnwz4hjicz42h7m-poppler-utils-24.02.0-dev",
+        "out": "/nix/store/z227kjngla4l7jn7a5719izxqrmm7vpw-poppler-utils-24.02.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python3",
+      "broken": false,
+      "derivation": "/nix/store/nfqzgvmajgyf3h5hchs03ngs99h0zaqn-python3-3.12.7.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python3",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "python3-3.12.7",
+      "pname": "python3",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.12.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/2djmffykchgm4q4j7ylv7xgkg441mp2j-python3-3.12.7"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python3",
+      "broken": false,
+      "derivation": "/nix/store/nrwf0ar2p6wrx17vvs9zfmllkn1p1gqh-python3-3.12.7.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python3",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "python3-3.12.7",
+      "pname": "python3",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.12.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/i2dk7l0b260px2i3v751z12kh6fkanzw-python3-3.12.7-debug",
+        "out": "/nix/store/zkzg2gaacmhc2i9ggp35dbl5x0y49531-python3-3.12.7"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python3",
+      "broken": false,
+      "derivation": "/nix/store/8xdxhcf5yh5p4rc1b8i3g0z3bq52kv46-python3-3.12.7.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python3",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "python3-3.12.7",
+      "pname": "python3",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.12.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/70ifxn668cb1y4yiy35v0g8ic1wg33cz-python3-3.12.7"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python3",
+      "broken": false,
+      "derivation": "/nix/store/97s6qwipyppnh12dayv0k3qml0xb5dsq-python3-3.12.7.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python3",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "python3-3.12.7",
+      "pname": "python3",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.12.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/1qffxia2lrnwa8pcwbl1hk4i5v5xagcj-python3-3.12.7-debug",
+        "out": "/nix/store/901c80rlps5q05bnjk1sj4zaz5k736nc-python3-3.12.7"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tesseract",
+      "broken": false,
+      "derivation": "/nix/store/zjljm05b3qqqj1a41cymqfirw1hfzzr2-tesseract-5.3.4.drv",
+      "description": "OCR engine",
+      "install_id": "tesseract",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "tesseract-5.3.4",
+      "pname": "tesseract",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.3.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/blg2p7w4706ar34h3irbl16qidaajpvv-tesseract-5.3.4"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tesseract",
+      "broken": false,
+      "derivation": "/nix/store/q5iqk34q6bf1kg166b9xagxplh6zxkyh-tesseract-5.3.4.drv",
+      "description": "OCR engine",
+      "install_id": "tesseract",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "tesseract-5.3.4",
+      "pname": "tesseract",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.3.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/sk57k9ipfd8azlzbzmiv1v2h9k76mqas-tesseract-5.3.4"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tesseract",
+      "broken": false,
+      "derivation": "/nix/store/gybsc1vnyq24bkvr87idh3n7fzkpc4qi-tesseract-5.3.4.drv",
+      "description": "OCR engine",
+      "install_id": "tesseract",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "tesseract-5.3.4",
+      "pname": "tesseract",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.3.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/xzqspc6q96hfz291mg1q5224vvv2v2qq-tesseract-5.3.4"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "tesseract",
+      "broken": false,
+      "derivation": "/nix/store/rxfxwxhmhb9mbmcmfqjivm0c58lxmwxc-tesseract-5.3.4.drv",
+      "description": "OCR engine",
+      "install_id": "tesseract",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "tesseract-5.3.4",
+      "pname": "tesseract",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.3.4",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/dla8g8lpkv22nkdklvwdpqs8dab722mr-tesseract-5.3.4"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "weaviate",
+      "broken": false,
+      "derivation": "/nix/store/f9lcy78x5d7z525v3fqh1q7ypmgka70r-weaviate-1.26.6.drv",
+      "description": "ML-first vector search engine",
+      "install_id": "weaviate",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "weaviate-1.26.6",
+      "pname": "weaviate",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.26.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/cpf599qri9xlba3jd06sflsix2mdgn0k-weaviate-1.26.6"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "weaviate",
+      "broken": false,
+      "derivation": "/nix/store/l8fi727495dc3rs65c3f3b088s350wg4-weaviate-1.26.6.drv",
+      "description": "ML-first vector search engine",
+      "install_id": "weaviate",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "weaviate-1.26.6",
+      "pname": "weaviate",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.26.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/r99hysxm0m51cj4qckjsb2b74ldqv1jy-weaviate-1.26.6"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "weaviate",
+      "broken": false,
+      "derivation": "/nix/store/b1wm83cgcwy2hdb062i1qk4z5858wjcj-weaviate-1.26.6.drv",
+      "description": "ML-first vector search engine",
+      "install_id": "weaviate",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "weaviate-1.26.6",
+      "pname": "weaviate",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.26.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/v5v2ivibp5c2l8qvscyldxp9igqsdbdv-weaviate-1.26.6"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "weaviate",
+      "broken": false,
+      "derivation": "/nix/store/x8w4ynfaszfxr464q2mhagnlhcczzxzg-weaviate-1.26.6.drv",
+      "description": "ML-first vector search engine",
+      "install_id": "weaviate",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "weaviate-1.26.6",
+      "pname": "weaviate",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.26.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/m8vxjjc3xhah9n29mip3mypzrv0ih4xv-weaviate-1.26.6"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/cz1pk0sam061n4wnpl3ka8i661x3csgg-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/yd2i0x6pvxbcyrwj8bjr6xq88cpr3ac6-yarn-1.22.22"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/xdawn8bjk20ffzl7p1a6f0vagq00j64a-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/xph2b7ri9ixs1kr7qg9zlksmf86prcqn-yarn-1.22.22"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/07ch5spqqmqbywljb6ml07ajpiqlqszk-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/db3fkh9fqmq4qcslp32p7436c6q4738q-yarn-1.22.22"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/q994dzagxwkzgqwpc2iix141pzx9sbsd-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/fsyk2yniga62hvkyz45b6zqimnkb68zh-yarn-1.22.22"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}

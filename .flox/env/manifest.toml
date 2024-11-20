@@ -1,0 +1,120 @@
+# Flox manifest version managed by Flox CLI
+version = 1
+
+# List packages you wish to install in your environment inside
+# the `[install]` section.
+[install]
+# hello.pkg-path = "hello"
+# nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
+
+# frontend deps
+nodejs.pkg-path = "nodejs"
+yarn.pkg-path = "yarn"
+
+# backend deps
+python3.pkg-path = "python3"
+gum.pkg-path = "gum"
+cmake.pkg-path = "cmake"
+poppler_utils.pkg-path = "poppler_utils"
+tesseract.pkg-path = "tesseract"
+
+# db
+neo4j.pkg-path = "neo4j"
+ollama.pkg-path = "ollama"
+
+# Set environment variables in the `[vars]` section. These variables may not
+# reference one another, and are added to the environment without first
+# expanding them. They are available for use in the `[profile]` and `[hook]`
+# scripts.
+[vars]
+# Optional Backend
+NEO4J_URI = "neo4j://localhost:7687"
+NEO4J_PASSWORD = "password"
+NEO4J_USERNAME = "neo4j"
+OPENAI_API_KEY = ""
+DIFFBOT_API_KEY = ""
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+LANGCHAIN_ENDPOINT = ""
+LANGCHAIN_TRACING_V2 = ""
+LANGCHAIN_PROJECT = ""
+LANGCHAIN_API_KEY = ""
+KNN_MIN_SCORE = "0.94"
+IS_EMBEDDING = "true"
+GEMINI_ENABLED = "False"
+GCP_LOG_METRICS_ENABLED = "False"
+UPDATE_GRAPH_CHUNKS_PROCESSED = "20"
+NUMBER_OF_CHUNKS_TO_COMBINE = "6"
+ENTITY_EMBEDDING = "False"
+GCS_FILE_CACHE = "False"
+# LLM_MODEL_CONFIG_anthropic_claude_35_sonnet = ""
+# LLM_MODEL_CONFIG_fireworks_llama_v3_70b = ""
+# LLM_MODEL_CONFIG_azure_ai_gpt_4o = ""
+# LLM_MODEL_CONFIG_azure_ai_gpt_35 = ""
+# LLM_MODEL_CONFIG_groq_llama3_70b = ""
+# LLM_MODEL_CONFIG_bedrock_claude_3_5_sonnet = ""
+# LLM_MODEL_CONFIG_fireworks_qwen_72b = ""
+LLM_MODEL_CONFIG_ollama_llama3 = "llama3,http://localhost:11434"
+
+# Optional Frontend
+VITE_BACKEND_API_URL = "http://localhost:8000"
+VITE_REACT_APP_SOURCES="local,youtube,wiki,s3,web"
+VITE_GOOGLE_CLIENT_ID = ""
+VITE_BLOOM_URL = "https://workspace-preview.neo4j.io/workspace/explore?connectURL={CONNECT_URL}&search=Show+me+a+graph&featureGenAISuggestions=true&featureGenAISuggestionsInternal=true"
+VITE_TIME_PER_PAGE = "50"
+VITE_CHUNK_SIZE = "5242880"
+VITE_LARGE_FILE_SIZE = "5242880"
+VITE_ENV = "DEV"
+VITE_CHAT_MODES = ""
+VITE_BATCH_SIZE = "2"
+VITE_LLM_MODELS = ""
+# VITE_LLM_MODELS_PROD="openai_gpt_4o,openai_gpt_4o_mini,diffbot,gemini_1.5_flash"
+VITE_LLM_MODELS_PROD="ollama_llama3"
+
+
+[hook]
+on-activate = '''
+# If we export this here, it can be used later in 'profiles.common'
+export PYTHON_DIR="$FLOX_ENV_CACHE/python"
+
+if [ ! -d "$PYTHON_DIR" ]; then
+  gum spin -s globe --title "Creating venv in $PYTHON_DIR..." -- python -m venv "$PYTHON_DIR"
+fi
+
+(
+  source "$PYTHON_DIR/bin/activate"
+  gum spin -s monkey --title "Installing/updating requirements.txt ..." -- pip install -r backend/requirements.txt
+)
+
+(
+  cd frontend
+  gum spin -s monkey --title "Installing/updating JS dependencies ..." -- yarn install
+)
+'''
+
+
+[profile]
+common = '''
+  # Activate the Python venv
+  source "$PYTHON_DIR/bin/activate"
+'''
+
+[services]
+frontend.command = '''
+cd frontend
+yarn run serve
+'''
+
+backend.command = '''
+cd backend
+python3 score.py
+'''
+# gunicorn score:app --workers 8 --threads 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300
+
+ollama.command = '''
+ollama serve
+'''
+
+[options]
+systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
+# Uncomment to disable CUDA detection.
+# cuda-detection = false
