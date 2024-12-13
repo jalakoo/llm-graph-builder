@@ -79,8 +79,8 @@ VITE_LLM_MODELS_PROD="ollama_llama3"
 
 [hook]
 on-activate = '''
-# If we export this here, it can be used later in 'profiles.common'
-export PYTHON_DIR="$FLOX_ENV_CACHE/python"
+  # If we export this here, it can be used later in 'profiles.common/bash'
+  export PYTHON_DIR="$FLOX_ENV_CACHE/python"
 
   test -d "${PYTHON_DIR}" \
     || uv venv "${PYTHON_DIR}" --allow-existing
@@ -89,6 +89,8 @@ export PYTHON_DIR="$FLOX_ENV_CACHE/python"
   uv pip install -r backend/requirements.txt
 
   yarn --cwd frontend install
+
+  ollama list | grep "^llama3" || ollama pull llama3
 '''
 
 
