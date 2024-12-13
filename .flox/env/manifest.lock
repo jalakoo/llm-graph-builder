@@ -84,7 +84,7 @@
       "VITE_TIME_PER_PAGE": "50"
     },
     "hook": {
-      "on-activate": "  # If we export this here, it can be used later in 'profiles.common/bash'\n  export PYTHON_DIR=\"$FLOX_ENV_CACHE/python\"\n\n  test -d \"${PYTHON_DIR}\" \\\n    || uv venv \"${PYTHON_DIR}\" --allow-existing\n  source \"$PYTHON_DIR/bin/activate\"\n  \n  uv pip install -r backend/requirements.txt\n\n  yarn --cwd frontend install\n"
+      "on-activate": "  # If we export this here, it can be used later in 'profiles.common/bash'\n  export PYTHON_DIR=\"$FLOX_ENV_CACHE/python\"\n\n  test -d \"${PYTHON_DIR}\" \\\n    || uv venv \"${PYTHON_DIR}\" --allow-existing\n  source \"$PYTHON_DIR/bin/activate\"\n  \n  uv pip install -r backend/requirements.txt\n\n  yarn --cwd frontend install\n\n  echo \"\n  you can check the status of the llama3 model with:\n    flox services logs --follow models\n  or:\n    ollama list\n  \"\n"
     },
     "profile": {
       "bash": "source \"$PYTHON_DIR/bin/activate\"\n",
@@ -120,7 +120,7 @@
         "systems": null
       },
       "models": {
-        "command": "# wait for ollama to be ready\nuntil ollama list; do\n  sleep 0.1\ndone\n\nollama pull llama3:latest\n",
+        "command": "# wait for ollama to be ready\nuntil ollama list; do\n  sleep 0.1\ndone\n\nollama list | grep -q \"^llama3\" || ollama pull llama3:latest\n",
         "vars": null,
         "is-daemon": null,
         "shutdown": null,

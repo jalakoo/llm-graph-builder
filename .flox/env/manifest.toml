@@ -89,6 +89,13 @@ on-activate = '''
   uv pip install -r backend/requirements.txt
 
   yarn --cwd frontend install
+
+  echo "
+  you can check the status of the llama3 model with:
+    flox services logs --follow models
+  or:
+    ollama list
+  "
 '''
 
 
@@ -130,7 +137,8 @@ until ollama list; do
   sleep 0.1
 done
 
-ollama pull llama3:latest
+ollama list | grep -q "^llama3" || \
+  ollama pull llama3:latest
 """
 
 [options]
