@@ -89,8 +89,6 @@ on-activate = '''
   uv pip install -r backend/requirements.txt
 
   yarn --cwd frontend install
-
-  ollama list | grep "^llama3" || ollama pull llama3
 '''
 
 
@@ -125,6 +123,15 @@ python3 score.py
 ollama.command = '''
 ollama serve
 '''
+
+models.command = """
+# wait for ollama to be ready
+until ollama list; do
+  sleep 0.1
+done
+
+ollama pull llama3:latest
+"""
 
 [options]
 systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
