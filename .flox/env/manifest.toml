@@ -1,20 +1,20 @@
-# Flox manifest version managed by Flox CLI
+# manifest version managed by Flox CLI
 version = 1
 
-# List packages you wish to install in your environment inside
-# the `[install]` section.
 [install]
-# hello.pkg-path = "hello"
-# nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
-
 # frontend deps
 nodejs.pkg-path = "nodejs"
 yarn.pkg-path = "yarn"
 
 # backend deps
-python3.pkg-path = "python3"
-gum.pkg-path = "gum"
+python.pkg-path = "python311"
+python.priority = 0
+
+google-crc32c.pkg-path = "python311Packages.google-crc32c"
+
+uv.pkg-path = "uv"
 cmake.pkg-path = "cmake"
+
 poppler_utils.pkg-path = "poppler_utils"
 tesseract.pkg-path = "tesseract"
 
@@ -28,12 +28,12 @@ glibc.systems = [ "x86_64-linux" , "aarch64-linux"]
 neo4j.pkg-path = "neo4j"
 ollama.pkg-path = "ollama"
 
-# Set environment variables in the `[vars]` section. These variables may not
-# reference one another, and are added to the environment without first
-# expanding them. They are available for use in the `[profile]` and `[hook]`
-# scripts.
+
 [vars]
-# Optional Backend
+UV_PYTHON_PREFERENCE = "only-system"
+UV_PYTHON_DOWNLOADS = "never"
+
+# Backend
 NEO4J_URI = "neo4j://localhost:7687"
 NEO4J_PASSWORD = "password"
 NEO4J_USERNAME = "neo4j"
@@ -61,7 +61,7 @@ GCS_FILE_CACHE = "False"
 # LLM_MODEL_CONFIG_fireworks_qwen_72b = ""
 LLM_MODEL_CONFIG_ollama_llama3 = "llama3,http://localhost:11434"
 
-# Optional Frontend
+# Frontend
 VITE_BACKEND_API_URL = "http://localhost:8000"
 VITE_REACT_APP_SOURCES="local,youtube,wiki,s3,web"
 VITE_GOOGLE_CLIENT_ID = ""
@@ -79,30 +79,40 @@ VITE_LLM_MODELS_PROD="ollama_llama3"
 
 [hook]
 on-activate = '''
-# If we export this here, it can be used later in 'profiles.common'
-export PYTHON_DIR="$FLOX_ENV_CACHE/python"
+  # If we export this here, it can be used later in 'profiles.common/bash'
+  export PYTHON_DIR="$FLOX_ENV_CACHE/python"
 
-if [ ! -d "$PYTHON_DIR" ]; then
-  gum spin -s globe --title "Creating venv in $PYTHON_DIR..." -- python -m venv "$PYTHON_DIR"
-fi
-
-(
+  test -d "${PYTHON_DIR}" \
+    || uv venv "${PYTHON_DIR}" --allow-existing
   source "$PYTHON_DIR/bin/activate"
-  gum spin -s monkey --title "Installing/updating requirements.txt ..." -- pip install -r backend/requirements.txt
-)
+  
+  uv pip install -r backend/requirements.txt
 
-(
-  cd frontend
-  gum spin -s monkey --title "Installing/updating JS dependencies ..." -- yarn install
-)
+  yarn --cwd frontend install
+
+  echo "
+  you can check the status of the llama3 model with:
+    flox services logs --follow models
+  or:
+    ollama list
+  "
 '''
 
 
 [profile]
-common = '''
-  # Activate the Python venv
-  source "$PYTHON_DIR/bin/activate"
+bash = '''
+source "$PYTHON_DIR/bin/activate"
 '''
+fish = '''
+source "$PYTHON_DIR/bin/activate.fish"
+'''
+tcsh = '''
+source "$PYTHON_DIR/bin/activate.csh"
+'''
+zsh = '''
+source "$PYTHON_DIR/bin/activate"
+'''
+
 
 [services]
 frontend.command = '''
@@ -120,6 +130,16 @@ python3 score.py
 ollama.command = '''
 ollama serve
 '''
+
+models.command = """
+# wait for ollama to be ready
+until ollama list; do
+  sleep 0.1
+done
+
+ollama list | grep -q "^llama3" || \
+  ollama pull llama3:latest
+"""
 
 [options]
 systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
