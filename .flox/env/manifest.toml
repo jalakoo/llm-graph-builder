@@ -95,6 +95,8 @@ on-activate = '''
     flox services logs --follow models
   or:
     ollama list
+
+  The llm-graph-builder app should now be running at http://localhost:5173
   "
 '''
 
