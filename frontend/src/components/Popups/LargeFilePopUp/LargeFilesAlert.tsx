@@ -16,7 +16,7 @@ import s3logo from '../../../assets/images/s3logo.png';
 import { calculateProcessingTime } from '../../../utils/Utils';
 import { ThemeWrapperContext } from '../../../context/ThemeWrapper';
 
-const LargeFilesAlert: FC<LargefilesProps> = ({ largeFiles, handleToggle, checked }) => {
+const LargeFilesAlert: FC<LargefilesProps> = ({ Files, handleToggle, checked }) => {
   const { colorMode } = useContext(ThemeWrapperContext);
 
   const imageIcon: Record<string, string> = useMemo(
@@ -31,7 +31,7 @@ const LargeFilesAlert: FC<LargefilesProps> = ({ largeFiles, handleToggle, checke
   );
   return (
     <div className='n-bg-palette-neutral-bg-weak p-4'>
-      <div className='flex flex-row pb-6 items-center mb-2'>
+      <div className='flex! flex-row pb-6 items-center mb-2'>
         <img
           style={{ width: 95, height: 95, marginRight: 10, alignSelf: 'flex-start' }}
           src={BellImage}
@@ -44,7 +44,7 @@ const LargeFilesAlert: FC<LargefilesProps> = ({ largeFiles, handleToggle, checke
             estimated times below
           </Typography>
           <List className='max-h-80 overflow-y-auto'>
-            {largeFiles.map((f, i) => {
+            {Files.map((f, i) => {
               const { minutes, seconds } = calculateProcessingTime(f.size as number, 0.2);
               return (
                 <ListItem key={i} disablePadding>
@@ -65,7 +65,7 @@ const LargeFilesAlert: FC<LargefilesProps> = ({ largeFiles, handleToggle, checke
                     </ListItemIcon>
                     <ListItemAvatar>
                       {imageIcon[f.fileSource] ? (
-                        <img width={20} height={20} src={imageIcon[f.fileSource]}></img>
+                        <img width={20} height={20} src={imageIcon[f.fileSource]} alt='source-logo'></img>
                       ) : (
                         <DocumentTextIconOutline className='n-size-token-7 mr-2' />
                       )}
@@ -78,8 +78,8 @@ const LargeFilesAlert: FC<LargefilesProps> = ({ largeFiles, handleToggle, checke
                             {f.fileSource === 'local file' && minutes === 0 && typeof f.size === 'number'
                               ? `- ${seconds} Sec `
                               : f.fileSource === 'local file'
-                              ? `- ${minutes} Min`
-                              : ''}
+                                ? `- ${minutes} Min`
+                                : ''}
                           </span>
                           {typeof f.size === 'number' && f.size > chunkSize ? (
                             <span>

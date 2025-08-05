@@ -1,23 +1,152 @@
-import { lazy, Suspense, useEffect, useReducer, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import SideNav from './SideNav';
 import DrawerDropzone from './DrawerDropzone';
 import DrawerChatbot from './DrawerChatbot';
 import Content from '../Content';
 import { clearChatAPI } from '../../services/QnaAPI';
 import { useCredentials } from '../../context/UserCredentials';
-import { connectionState, UserCredentials } from '../../types';
+import { connectionState, OptionType } from '../../types';
 import { useMessageContext } from '../../context/UserMessages';
-import { useMediaQuery } from '@mui/material';
+import { useMediaQuery, Spotlight, SpotlightTour, useSpotlightContext } from '@neo4j-ndl/react';
 import { useFileContext } from '../../context/UsersFiles';
-import SchemaFromTextDialog from '../Popups/Settings/SchemaFromText';
+import SchemaFromTextDialog from '../../components/Popups/GraphEnhancementDialog/EnitityExtraction/SchemaFromTextDialog';
 import useSpeechSynthesis from '../../hooks/useSpeech';
 import FallBackDialog from '../UI/FallBackDialog';
 import { envConnectionAPI } from '../../services/ConnectAPI';
 import { healthStatus } from '../../services/HealthStatus';
+import { useAuth0 } from '@auth0/auth0-react';
+import { showErrorToast } from '../../utils/Toasts';
+import { APP_SOURCES } from '../../utils/Constants';
+import { createDefaultFormData } from '../../API/Index';
+import LoadDBSchemaDialog from '../Popups/GraphEnhancementDialog/EnitityExtraction/LoadExistingSchema';
+import PredefinedSchemaDialog from '../Popups/GraphEnhancementDialog/EnitityExtraction/PredefinedSchemaDialog';
+import { SKIP_AUTH } from '../../utils/Constants';
 import { useNavigate } from 'react-router';
+import { deduplicateByFullPattern, deduplicateNodeByValue } from '../../utils/Utils';
+import DataImporterSchemaDialog from '../Popups/GraphEnhancementDialog/EnitityExtraction/DataImporter';
 
+
+const GCSModal = lazy(() => import('../DataSources/GCS/GCSModal'));
+const S3Modal = lazy(() => import('../DataSources/AWS/S3Modal'));
+const GenericModal = lazy(() => import('../WebSources/GenericSourceModal'));
 const ConnectionModal = lazy(() => import('../Popups/ConnectionModal/ConnectionModal'));
-
+const spotlightsforunauthenticated = [
+  {
+    target: 'loginbutton',
+    children: (
+      <>
+        <Spotlight.Header>Login with Neo4j</Spotlight.Header>
+        <Spotlight.Body>Using Google Account or Email Address</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'connectbutton',
+    children: (
+      <>
+        <Spotlight.Header>Connect To Neo4j Database</Spotlight.Header>
+        <Spotlight.Body>Fill out the neo4j credentials and click on connect</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'dropzone',
+    children: (
+      <>
+        <Spotlight.Header>Upload documents </Spotlight.Header>
+        <Spotlight.Body>Upload any unstructured files</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'llmdropdown',
+    children: (
+      <>
+        <Spotlight.Header>Choose The Desired LLM</Spotlight.Header>
+      </>
+    ),
+  },
+  {
+    target: 'generategraphbtn',
+    children: (
+      <>
+        <Spotlight.Header>Start The Extraction Process</Spotlight.Header>
+        <Spotlight.Body>Click On Generate Graph</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'visualizegraphbtn',
+    children: (
+      <>
+        <Spotlight.Header>Visualize The Knowledge Graph</Spotlight.Header>
+        <Spotlight.Body>Select At Least One or More Completed Files From The Table For Visualization</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'chatbtn',
+    children: (
+      <>
+        <Spotlight.Header>Ask Questions Related To Documents</Spotlight.Header>
+      </>
+    ),
+  },
+];
+const spotlights = [
+  {
+    target: 'connectbutton',
+    children: (
+      <>
+        <Spotlight.Header>Connect To Neo4j Database</Spotlight.Header>
+        <Spotlight.Body>Fill out the neo4j credentials and click on connect</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'dropzone',
+    children: (
+      <>
+        <Spotlight.Header>Upload documents </Spotlight.Header>
+        <Spotlight.Body>Upload any unstructured files</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'llmdropdown',
+    children: (
+      <>
+        <Spotlight.Header>Choose The Desired LLM</Spotlight.Header>
+      </>
+    ),
+  },
+  {
+    target: 'generategraphbtn',
+    children: (
+      <>
+        <Spotlight.Header>Start The Extraction Process</Spotlight.Header>
+        <Spotlight.Body>Click On Generate Graph</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'visualizegraphbtn',
+    children: (
+      <>
+        <Spotlight.Header>Visualize The Knowledge Graph</Spotlight.Header>
+        <Spotlight.Body>Select At Least One or More Completed Files From The Table For Visualization</Spotlight.Body>
+      </>
+    ),
+  },
+  {
+    target: 'chatbtn',
+    children: (
+      <>
+        <Spotlight.Header>Ask Questions Related To Documents</Spotlight.Header>
+      </>
+    ),
+  },
+];
 const PageLayout: React.FC = () => {
   const [openConnection, setOpenConnection] = useState<connectionState>({
     openPopUp: false,
@@ -25,35 +154,18 @@ const PageLayout: React.FC = () => {
     vectorIndexMisMatch: false,
     chunksExistsWithDifferentDimension: false,
   });
-  const largedesktops = useMediaQuery(`(min-width:1440px )`);
-  const { userCredentials, connectionStatus, setIsReadOnlyUser } = useCredentials();
-  const [isLeftExpanded, setIsLeftExpanded] = useState<boolean>(Boolean(largedesktops));
-  const [isRightExpanded, setIsRightExpanded] = useState<boolean>(Boolean(largedesktops));
+  const isLargeDesktop = useMediaQuery(`(min-width:1440px )`);
+  const [isLeftExpanded, setIsLeftExpanded] = useState<boolean>(false);
+  const [isRightExpanded, setIsRightExpanded] = useState<boolean>(false);
   const [showChatBot, setShowChatBot] = useState<boolean>(false);
   const [showDrawerChatbot, setShowDrawerChatbot] = useState<boolean>(true);
   const [showEnhancementDialog, toggleEnhancementDialog] = useReducer((s) => !s, false);
   const [shows3Modal, toggleS3Modal] = useReducer((s) => !s, false);
   const [showGCSModal, toggleGCSModal] = useReducer((s) => !s, false);
   const [showGenericModal, toggleGenericModal] = useReducer((s) => !s, false);
-  const navigate = useNavigate();
-  const toggleLeftDrawer = () => {
-    if (largedesktops) {
-      setIsLeftExpanded(!isLeftExpanded);
-    } else {
-      setIsLeftExpanded(false);
-    }
-  };
-  const toggleRightDrawer = () => {
-    if (largedesktops) {
-      setIsRightExpanded(!isRightExpanded);
-    } else {
-      setIsRightExpanded(false);
-    }
-  };
-
-  const { messages, setClearHistoryData, clearHistoryData, setMessages, setIsDeleteChatLoading } = useMessageContext();
-  const { isSchema, setIsSchema, setShowTextFromSchemaDialog, showTextFromSchemaDialog } = useFileContext();
   const {
+    connectionStatus,
+    setIsReadOnlyUser,
     setConnectionStatus,
     setGdsActive,
     setIsBackendConnected,
@@ -61,12 +173,69 @@ const PageLayout: React.FC = () => {
     setErrorMessage,
     setShowDisconnectButton,
     showDisconnectButton,
+    setIsGCSActive,
   } = useCredentials();
+  const {
+    setShowTextFromSchemaDialog,
+    showTextFromSchemaDialog,
+    setSchemaTextPattern,
+    schemaLoadDialog,
+    setSchemaLoadDialog,
+    setPredefinedSchemaDialog,
+    setDbPattern,
+    setSchemaValNodes,
+    predefinedSchemaDialog,
+    setSchemaValRels,
+    setDbNodes,
+    setDbRels,
+    setPreDefinedNodes,
+    setPreDefinedRels,
+    setPreDefinedPattern,
+    allPatterns,
+    selectedNodes,
+    selectedRels,
+    dataImporterSchemaDialog,
+    setDataImporterSchemaDialog,
+    setImporterPattern,
+    setImporterNodes,
+    setImporterRels,
+    setSourceOptions,
+    setTargetOptions,
+    setTypeOptions,
+  } = useFileContext();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth0();
   const { cancel } = useSpeechSynthesis();
+  const { setActiveSpotlight } = useSpotlightContext();
+  const isYoutubeOnly = useMemo(
+    () => APP_SOURCES.includes('youtube') && !APP_SOURCES.includes('wiki') && !APP_SOURCES.includes('web'),
+    []
+  );
+  const isWikipediaOnly = useMemo(
+    () => APP_SOURCES.includes('wiki') && !APP_SOURCES.includes('youtube') && !APP_SOURCES.includes('web'),
+    []
+  );
+  const isWebOnly = useMemo(
+    () => APP_SOURCES.includes('web') && !APP_SOURCES.includes('youtube') && !APP_SOURCES.includes('wiki'),
+    []
+  );
+  const { messages, setClearHistoryData, clearHistoryData, setMessages, setIsDeleteChatLoading } = useMessageContext();
+  const isFirstTimeUser = useMemo(() => localStorage.getItem('neo4j.connection') === null, []);
+
+  const [combinedPatternsVal, setCombinedPatternsVal] = useState<string[]>([]);
+  const [combinedNodesVal, setCombinedNodesVal] = useState<OptionType[]>([]);
+  const [combinedRelsVal, setCombinedRelsVal] = useState<OptionType[]>([]);
+
+  useEffect(() => {
+    if (allPatterns.length > 0 && selectedNodes.length > 0 && selectedRels.length > 0) {
+      setCombinedPatternsVal(allPatterns);
+      setCombinedNodesVal(selectedNodes as OptionType[]);
+      setCombinedRelsVal(selectedRels as OptionType[]);
+    }
+  }, [allPatterns, selectedNodes, selectedRels]);
 
   useEffect(() => {
     async function initializeConnection() {
-      const session = localStorage.getItem('neo4j.connection');
       // Fetch backend health status
       try {
         const response = await healthStatus();
@@ -79,126 +248,90 @@ const PageLayout: React.FC = () => {
         setShowDisconnectButton(isModalOpen);
         localStorage.setItem('disconnectButtonState', isModalOpen ? 'true' : 'false');
       };
-      // To parse and set user credentials from session
-      const setUserCredentialsFromSession = (neo4jConnection: string) => {
-        if (!neo4jConnection) {
-          console.error('Invalid session data:', neo4jConnection);
-          setOpenConnection((prev) => ({ ...prev, openPopUp: true }));
-          return;
-        }
-        try {
-          const parsedConnection = JSON.parse(neo4jConnection);
-          if (parsedConnection.uri && parsedConnection.user && parsedConnection.password && parsedConnection.database) {
-            setUserCredentials({
-              uri: parsedConnection.uri,
-              userName: parsedConnection.user,
-              password: atob(parsedConnection.password),
-              database: parsedConnection.database,
-            });
-            setGdsActive(parsedConnection.isgdsActive);
-            setIsReadOnlyUser(parsedConnection.isReadOnlyUser);
-          } else {
-            console.error('Invalid parsed session data:', parsedConnection);
-          }
-        } catch (error) {
-          console.error('Failed to parse session data:', error);
-        }
-      };
-      // To update credentials if environment values differ
-      const updateSessionIfNeeded = (envCredentials: UserCredentials, storedSession: string) => {
-        try {
-          const storedCredentials = JSON.parse(storedSession);
-          const isDiffCreds =
-            envCredentials.uri !== storedCredentials.uri ||
-            envCredentials.userName !== storedCredentials.user ||
-            btoa(envCredentials.password) !== storedCredentials.password ||
-            envCredentials.database !== storedCredentials.database;
-          if (isDiffCreds) {
-            setUserCredentials(envCredentials);
-            localStorage.setItem(
-              'neo4j.connection',
-              JSON.stringify({
-                uri: envCredentials.uri,
-                user: envCredentials.userName,
-                password: btoa(envCredentials.password),
-                database: envCredentials.database,
-                userDbVectorIndex: 384,
-                isReadOnlyUser: envCredentials.isReadonlyUser,
-                isgdsActive: envCredentials.isgdsActive,
-              })
-            );
-            return true;
-          }
-          return false;
-        } catch (error) {
-          console.error('Failed to update session:', error);
-          return false;
-        }
-      };
-      // Handle connection initialization
-      let backendApiResponse;
       try {
-        backendApiResponse = await envConnectionAPI();
+        const backendApiResponse = await envConnectionAPI();
         const connectionData = backendApiResponse.data;
-        const envCredentials = {
-          uri: connectionData.data.uri,
-          password: atob(connectionData.data.password),
-          userName: connectionData.data.user_name,
-          database: connectionData.data.database,
-          isReadonlyUser: !connectionData.data.write_access,
-          isgdsActive: connectionData.data.gds_status,
-        };
-        if (session) {
-          const updated = updateSessionIfNeeded(envCredentials, session);
-          if (!updated) {
-            setUserCredentialsFromSession(session); // Use stored session if no update is needed
-          }
+        if (connectionData.data && connectionData.status === 'Success') {
+          const credentials = {
+            uri: connectionData.data.uri,
+            isReadonlyUser: !connectionData.data.write_access,
+            isgdsActive: connectionData.data.gds_status,
+            isGCSActive: connectionData.data.gcs_file_cache === 'True',
+            chunksTobeProcess: Number(connectionData.data.chunk_to_be_created),
+            email: user?.email ?? '',
+            connection: 'backendApi',
+          };
+          setIsGCSActive(credentials.isGCSActive);
+          setUserCredentials(credentials);
+          createDefaultFormData({ uri: credentials.uri, email: credentials.email ?? '' });
+          setGdsActive(credentials.isgdsActive);
           setConnectionStatus(Boolean(connectionData.data.graph_connection));
-          setIsBackendConnected(true);
+          setIsReadOnlyUser(connectionData.data.isReadonlyUser);
           handleDisconnectButtonState(false);
-        } else {
-          setUserCredentials(envCredentials);
-          localStorage.setItem(
-            'neo4j.connection',
-            JSON.stringify({
-              uri: envCredentials.uri,
-              user: envCredentials.userName,
-              password: btoa(envCredentials.password),
-              database: envCredentials.database,
-              userDbVectorIndex: 384,
-              isReadOnlyUser: envCredentials.isReadonlyUser,
-              isgdsActive: envCredentials.isgdsActive,
-            })
-          );
-          setConnectionStatus(true);
-          setGdsActive(envCredentials.isgdsActive);
-          setIsReadOnlyUser(envCredentials.isReadonlyUser);
-          handleDisconnectButtonState(false);
-        }
-      } catch (error) {
-        console.error('Error during backend API call:', error);
-        if (session) {
-          setUserCredentialsFromSession(session);
-          setConnectionStatus(true);
+        } else if (!connectionData.data && connectionData.status === 'Success') {
+          const storedCredentials = localStorage.getItem('neo4j.connection');
+          if (storedCredentials) {
+            const credentials = JSON.parse(storedCredentials);
+            setUserCredentials({ ...credentials, password: atob(credentials.password) });
+            createDefaultFormData({
+              uri: credentials.uri,
+              database: credentials.database,
+              userName: credentials.userName,
+              password: atob(credentials?.password),
+              email: credentials.email ?? '',
+            });
+            setIsGCSActive(credentials.isGCSActive);
+            setGdsActive(credentials.isgdsActive);
+            setConnectionStatus(Boolean(credentials.connection === 'connectAPI'));
+            if (credentials.isReadonlyUser !== undefined) {
+              setIsReadOnlyUser(credentials.isReadonlyUser);
+            }
+            handleDisconnectButtonState(true);
+          } else {
+            handleDisconnectButtonState(true);
+          }
         } else {
           setErrorMessage(backendApiResponse?.data?.error);
-          setOpenConnection((prev) => ({ ...prev, openPopUp: true }));
+          handleDisconnectButtonState(true);
+          console.log('from else cndition error is there');
         }
-        handleDisconnectButtonState(true);
+      } catch (error) {
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
       }
     }
     initializeConnection();
-  }, []);
+    if (!isAuthenticated && isFirstTimeUser) {
+      setActiveSpotlight('loginbutton');
+    }
 
-  const deleteOnClick = async () => {
+    if ((isAuthenticated || SKIP_AUTH) && isFirstTimeUser) {
+      setActiveSpotlight('connectbutton');
+    }
+  }, [isAuthenticated, isFirstTimeUser]);
+
+  const toggleLeftDrawer = useCallback(() => {
+    if (isLargeDesktop) {
+      setIsLeftExpanded((old) => !old);
+    } else {
+      setIsLeftExpanded(false);
+    }
+  }, [isLargeDesktop]);
+  const toggleRightDrawer = useCallback(() => {
+    if (isLargeDesktop) {
+      setIsRightExpanded((prev) => !prev);
+    } else {
+      setIsRightExpanded(false);
+    }
+  }, [isLargeDesktop]);
+
+  const deleteOnClick = useCallback(async () => {
     try {
       setClearHistoryData(true);
       setIsDeleteChatLoading(true);
       cancel();
-      const response = await clearChatAPI(
-        userCredentials as UserCredentials,
-        sessionStorage.getItem('session_id') ?? ''
-      );
+      const response = await clearChatAPI(sessionStorage.getItem('session_id') ?? '');
       setIsDeleteChatLoading(false);
       if (response.data.status === 'Success') {
         const date = new Date();
@@ -223,10 +356,211 @@ const PageLayout: React.FC = () => {
       console.log(error);
       setClearHistoryData(false);
     }
-  };
+  }, []);
+
+  const handleApplyPatternsFromText = useCallback(
+    (
+      newPatterns: string[],
+      nodes: OptionType[],
+      rels: OptionType[],
+      updatedSource: OptionType[],
+      updatedTarget: OptionType[],
+      updatedType: OptionType[]
+    ) => {
+      setSchemaTextPattern((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setCombinedPatternsVal((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setShowTextFromSchemaDialog({
+        triggeredFrom: 'schematextApply',
+        show: true,
+      });
+      setSchemaValNodes(nodes);
+      setCombinedNodesVal((prevNodes: OptionType[]) => {
+        const combined = [...nodes, ...prevNodes];
+        return deduplicateNodeByValue(combined);
+      });
+      setSchemaValRels(rels);
+      setCombinedRelsVal((prevRels: OptionType[]) => {
+        const combined = [...rels, ...prevRels];
+        return deduplicateByFullPattern(combined);
+      });
+      setSourceOptions((prev) => [...prev, ...updatedSource]);
+      setTargetOptions((prev) => [...prev, ...updatedTarget]);
+      setTypeOptions((prev) => [...prev, ...updatedType]);
+    },
+    []
+  );
+
+  const handleDbApply = useCallback(
+    (
+      newPatterns: string[],
+      nodes: OptionType[],
+      rels: OptionType[],
+      updatedSource: OptionType[],
+      updatedTarget: OptionType[],
+      updatedType: OptionType[]
+    ) => {
+      setDbPattern((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setCombinedPatternsVal((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setSchemaLoadDialog({
+        triggeredFrom: 'loadExistingSchemaApply',
+        show: true,
+      });
+      setDbNodes(nodes);
+      setCombinedNodesVal((prevNodes: OptionType[]) => {
+        const combined = [...nodes, ...prevNodes];
+        return deduplicateNodeByValue(combined);
+      });
+      setDbRels(rels);
+      setCombinedRelsVal((prevRels: OptionType[]) => {
+        const combined = [...rels, ...prevRels];
+        return deduplicateByFullPattern(combined);
+      });
+      setSourceOptions((prev) => [...prev, ...updatedSource]);
+      setTargetOptions((prev) => [...prev, ...updatedTarget]);
+      setTypeOptions((prev) => [...prev, ...updatedType]);
+    },
+    []
+  );
+  const handlePredinedApply = useCallback(
+    (
+      newPatterns: string[],
+      nodes: OptionType[],
+      rels: OptionType[],
+      updatedSource: OptionType[],
+      updatedTarget: OptionType[],
+      updatedType: OptionType[]
+    ) => {
+      setPreDefinedPattern((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setCombinedPatternsVal((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setPredefinedSchemaDialog({
+        triggeredFrom: 'predefinedSchemaApply',
+        show: true,
+      });
+      setPreDefinedNodes(nodes);
+      setCombinedNodesVal((prevNodes: OptionType[]) => {
+        const combined = [...nodes, ...prevNodes];
+        return deduplicateNodeByValue(combined);
+      });
+      setPreDefinedRels(rels);
+      setCombinedRelsVal((prevRels: OptionType[]) => {
+        const combined = [...rels, ...prevRels];
+        return deduplicateByFullPattern(combined);
+      });
+      setSourceOptions((prev) => [...prev, ...updatedSource]);
+      setTargetOptions((prev) => [...prev, ...updatedTarget]);
+      setTypeOptions((prev) => [...prev, ...updatedType]);
+    },
+    []
+  );
+
+  const handleImporterApply = useCallback(
+    (
+      newPatterns: string[],
+      nodes: OptionType[],
+      rels: OptionType[],
+      updatedSource: OptionType[],
+      updatedTarget: OptionType[],
+      updatedType: OptionType[]
+    ) => {
+      setImporterPattern((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setCombinedPatternsVal((prevPatterns: string[]) => {
+        const uniquePatterns = Array.from(new Set([...newPatterns, ...prevPatterns]));
+        return uniquePatterns;
+      });
+      setDataImporterSchemaDialog({
+        triggeredFrom: 'importerSchemaApply',
+        show: true,
+      });
+      setImporterNodes(nodes);
+      setCombinedNodesVal((prevNodes: OptionType[]) => {
+        const combined = [...nodes, ...prevNodes];
+        return deduplicateNodeByValue(combined);
+      });
+      setImporterRels(rels);
+      setCombinedRelsVal((prevRels: OptionType[]) => {
+        const combined = [...rels, ...prevRels];
+        return deduplicateByFullPattern(combined);
+      });
+      setSourceOptions((prev) => [...prev, ...updatedSource]);
+      setTargetOptions((prev) => [...prev, ...updatedTarget]);
+      setTypeOptions((prev) => [...prev, ...updatedType]);
+    },
+    []
+  );
+
+  const openPredefinedSchema = useCallback(() => {
+    setPredefinedSchemaDialog({ triggeredFrom: 'predefinedDialog', show: true });
+  }, []);
+
+  const openLoadSchema = useCallback(() => {
+    setSchemaLoadDialog({ triggeredFrom: 'loadDialog', show: true });
+  }, []);
+
+  const openTextSchema = useCallback(() => {
+    setShowTextFromSchemaDialog({ triggeredFrom: 'schemadialog', show: true });
+  }, []);
+
+  const openDataImporterSchema = useCallback(() => {
+    setDataImporterSchemaDialog({ triggeredFrom: 'schemadialog', show: true });
+  }, []);
+
+  const openChatBot = useCallback(() => setShowChatBot(true), []);
 
   return (
-    <div style={{ maxHeight: 'calc(100vh - 58px)' }} className='flex overflow-hidden'>
+    <>
+      {!isAuthenticated && !SKIP_AUTH && isFirstTimeUser ? (
+        <SpotlightTour
+          spotlights={spotlightsforunauthenticated}
+          onAction={(target, action) => {
+            if (target == 'connectbutton' && action == 'next') {
+              if (!isLeftExpanded) {
+                toggleLeftDrawer();
+              }
+            }
+            if (target === 'visualizegraphbtn' && action === 'next' && !isRightExpanded) {
+              toggleRightDrawer();
+            }
+            console.log(`Action ${action} was performed in spotlight ${target}`);
+          }}
+        />
+      ) : (isAuthenticated || SKIP_AUTH) && isFirstTimeUser ? (
+        <SpotlightTour
+          spotlights={spotlights}
+          onAction={(target, action) => {
+            if (target == 'connectbutton' && action == 'next') {
+              if (!isLeftExpanded) {
+                toggleLeftDrawer();
+              }
+            }
+            if (target === 'visualizegraphbtn' && action === 'next' && !isRightExpanded) {
+              toggleRightDrawer();
+            }
+            console.log(`Action ${action} was performed in spotlight ${target}`);
+          }}
+        />
+      ) : null}
+
       <Suspense fallback={<FallBackDialog />}>
         <ConnectionModal
           open={openConnection.openPopUp}
@@ -237,23 +571,6 @@ const PageLayout: React.FC = () => {
           chunksExistsWithDifferentEmbedding={openConnection.chunksExistsWithDifferentDimension}
         />
       </Suspense>
-      <SideNav
-        toggles3Modal={toggleS3Modal}
-        toggleGCSModal={toggleGCSModal}
-        toggleGenericModal={toggleGenericModal}
-        isExpanded={isLeftExpanded}
-        position='left'
-        toggleDrawer={toggleLeftDrawer}
-      />
-      <DrawerDropzone
-        shows3Modal={shows3Modal}
-        showGCSModal={showGCSModal}
-        showGenericModal={showGenericModal}
-        toggleGCSModal={toggleGCSModal}
-        toggleGenericModal={toggleGenericModal}
-        toggleS3Modal={toggleS3Modal}
-        isExpanded={isLeftExpanded}
-      />
       <SchemaFromTextDialog
         open={showTextFromSchemaDialog.show}
         onClose={() => {
@@ -266,47 +583,196 @@ const PageLayout: React.FC = () => {
               break;
           }
         }}
+        onApply={handleApplyPatternsFromText}
       ></SchemaFromTextDialog>
-      <Content
-        openChatBot={() => setShowChatBot(true)}
-        isLeftExpanded={isLeftExpanded}
-        isRightExpanded={isRightExpanded}
-        showChatBot={showChatBot}
-        openTextSchema={() => {
-          setShowTextFromSchemaDialog({ triggeredFrom: 'schemadialog', show: true });
+      <LoadDBSchemaDialog
+        open={schemaLoadDialog.show}
+        onClose={() => {
+          setSchemaLoadDialog({ triggeredFrom: '', show: false });
+          switch (schemaLoadDialog.triggeredFrom) {
+            case 'enhancementtab':
+              toggleEnhancementDialog();
+              break;
+            default:
+              break;
+          }
         }}
-        isSchema={isSchema}
-        setIsSchema={setIsSchema}
-        showEnhancementDialog={showEnhancementDialog}
-        toggleEnhancementDialog={toggleEnhancementDialog}
-        setOpenConnection={setOpenConnection}
-        showDisconnectButton={showDisconnectButton}
-        connectionStatus={connectionStatus}
+        onApply={handleDbApply}
       />
-      {showDrawerChatbot && (
-        <DrawerChatbot
-          messages={messages}
-          isExpanded={isRightExpanded}
-          clearHistoryData={clearHistoryData}
-          connectionStatus={connectionStatus}
-        />
+      <PredefinedSchemaDialog
+        open={predefinedSchemaDialog.show}
+        onClose={() => {
+          setPredefinedSchemaDialog({ triggeredFrom: '', show: false });
+          switch (predefinedSchemaDialog.triggeredFrom) {
+            case 'enhancementtab':
+              toggleEnhancementDialog();
+              break;
+            default:
+              break;
+          }
+        }}
+        onApply={handlePredinedApply}
+      ></PredefinedSchemaDialog>
+      <DataImporterSchemaDialog
+        open={dataImporterSchemaDialog.show}
+        onClose={() => {
+          setDataImporterSchemaDialog({ triggeredFrom: '', show: false });
+          switch (dataImporterSchemaDialog.triggeredFrom) {
+            case 'enhancementtab':
+              toggleEnhancementDialog();
+              break;
+            default:
+              break;
+          }
+        }}
+        onApply={handleImporterApply}
+      ></DataImporterSchemaDialog>
+      {isLargeDesktop ? (
+        <div
+          className={`layout-wrapper ${!isLeftExpanded ? 'drawerdropzoneclosed' : ''} ${
+            !isRightExpanded ? 'drawerchatbotclosed' : ''
+          } ${!isRightExpanded && !isLeftExpanded ? 'drawerclosed' : ''}`}
+        >
+          <SideNav
+            toggles3Modal={toggleS3Modal}
+            toggleGCSModal={toggleGCSModal}
+            toggleGenericModal={toggleGenericModal}
+            isExpanded={isLeftExpanded}
+            position='left'
+            toggleDrawer={toggleLeftDrawer}
+          />
+          {isLeftExpanded && (
+            <DrawerDropzone
+              shows3Modal={shows3Modal}
+              showGCSModal={showGCSModal}
+              showGenericModal={showGenericModal}
+              toggleGCSModal={toggleGCSModal}
+              toggleGenericModal={toggleGenericModal}
+              toggleS3Modal={toggleS3Modal}
+              isExpanded={isLeftExpanded}
+            />
+          )}
+          <Content
+            openChatBot={openChatBot}
+            showChatBot={showChatBot}
+            openTextSchema={openTextSchema}
+            openLoadSchema={openLoadSchema}
+            openPredefinedSchema={openPredefinedSchema}
+            openDataImporterSchema={openDataImporterSchema}
+            showEnhancementDialog={showEnhancementDialog}
+            toggleEnhancementDialog={toggleEnhancementDialog}
+            setOpenConnection={setOpenConnection}
+            showDisconnectButton={showDisconnectButton}
+            connectionStatus={connectionStatus}
+            combinedPatterns={combinedPatternsVal}
+            setCombinedPatterns={setCombinedPatternsVal}
+            combinedNodes={combinedNodesVal}
+            setCombinedNodes={setCombinedNodesVal}
+            combinedRels={combinedRelsVal}
+            setCombinedRels={setCombinedRelsVal}
+          />
+          {isRightExpanded && (
+            <DrawerChatbot
+              messages={messages}
+              isExpanded={isRightExpanded}
+              clearHistoryData={clearHistoryData}
+              connectionStatus={connectionStatus}
+            />
+          )}
+          <SideNav
+            messages={messages}
+            isExpanded={isRightExpanded}
+            position='right'
+            toggleDrawer={toggleRightDrawer}
+            deleteOnClick={deleteOnClick}
+            showDrawerChatbot={showDrawerChatbot}
+            setShowDrawerChatbot={setShowDrawerChatbot}
+            setIsRightExpanded={setIsRightExpanded}
+            clearHistoryData={clearHistoryData}
+            toggleGCSModal={toggleGCSModal}
+            toggles3Modal={toggleS3Modal}
+            toggleGenericModal={toggleGenericModal}
+            setIsleftExpanded={setIsLeftExpanded}
+          />
+        </div>
+      ) : (
+        <>
+          {APP_SOURCES.includes('gcs') && (
+            <Suspense fallback={<FallBackDialog />}>
+              <GCSModal openGCSModal={toggleGCSModal} open={showGCSModal} hideModal={toggleGCSModal} />
+            </Suspense>
+          )}
+          {APP_SOURCES.includes('s3') && (
+            <Suspense fallback={<FallBackDialog />}>
+              <S3Modal hideModal={toggleS3Modal} open={shows3Modal} />
+            </Suspense>
+          )}
+
+          <Suspense fallback={<FallBackDialog />}>
+            <GenericModal
+              isOnlyYoutube={isYoutubeOnly}
+              isOnlyWikipedia={isWikipediaOnly}
+              isOnlyWeb={isWebOnly}
+              open={showGenericModal}
+              closeHandler={toggleGenericModal}
+            />
+          </Suspense>
+          <div className='layout-wrapper drawerclosed'>
+            <SideNav
+              toggles3Modal={toggleS3Modal}
+              toggleGCSModal={toggleGCSModal}
+              toggleGenericModal={toggleGenericModal}
+              isExpanded={isLeftExpanded}
+              position='left'
+              toggleDrawer={toggleLeftDrawer}
+            />
+
+            <Content
+              openChatBot={openChatBot}
+              showChatBot={showChatBot}
+              openTextSchema={openTextSchema}
+              openLoadSchema={openLoadSchema}
+              openPredefinedSchema={openPredefinedSchema}
+              openDataImporterSchema={openDataImporterSchema}
+              showEnhancementDialog={showEnhancementDialog}
+              toggleEnhancementDialog={toggleEnhancementDialog}
+              setOpenConnection={setOpenConnection}
+              showDisconnectButton={showDisconnectButton}
+              connectionStatus={connectionStatus}
+              combinedPatterns={combinedPatternsVal}
+              setCombinedPatterns={setCombinedPatternsVal}
+              combinedNodes={combinedNodesVal}
+              setCombinedNodes={setCombinedNodesVal}
+              combinedRels={combinedRelsVal}
+              setCombinedRels={setCombinedRelsVal}
+            />
+            {isRightExpanded && (
+              <DrawerChatbot
+                messages={messages}
+                isExpanded={isRightExpanded}
+                clearHistoryData={clearHistoryData}
+                connectionStatus={connectionStatus}
+              />
+            )}
+            <SideNav
+              messages={messages}
+              isExpanded={isRightExpanded}
+              position='right'
+              toggleDrawer={toggleRightDrawer}
+              deleteOnClick={deleteOnClick}
+              showDrawerChatbot={showDrawerChatbot}
+              setShowDrawerChatbot={setShowDrawerChatbot}
+              setIsRightExpanded={setIsRightExpanded}
+              clearHistoryData={clearHistoryData}
+              toggleGCSModal={toggleGCSModal}
+              toggles3Modal={toggleS3Modal}
+              toggleGenericModal={toggleGenericModal}
+              setIsleftExpanded={setIsLeftExpanded}
+            />
+          </div>
+        </>
       )}
-      <SideNav
-        messages={messages}
-        isExpanded={isRightExpanded}
-        position='right'
-        toggleDrawer={toggleRightDrawer}
-        deleteOnClick={deleteOnClick}
-        showDrawerChatbot={showDrawerChatbot}
-        setShowDrawerChatbot={setShowDrawerChatbot}
-        setIsRightExpanded={setIsRightExpanded}
-        clearHistoryData={clearHistoryData}
-        toggleGCSModal={toggleGCSModal}
-        toggles3Modal={toggleS3Modal}
-        toggleGenericModal={toggleGenericModal}
-        setIsleftExpanded={setIsLeftExpanded}
-      />
-    </div>
+    </>
   );
 };
 
